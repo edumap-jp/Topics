@@ -11,6 +11,7 @@
 
 App::uses('ModelBehavior', 'Model');
 App::uses('TopicsBaseBehavior', 'Topics.Model/Behavior');
+App::uses('NetCommonsDataServer', 'NetCommons.Utility');
 
 /**
  * Topics Behavior
@@ -367,12 +368,11 @@ class TopicsBehavior extends TopicsBaseBehavior {
 
 		$edmKey = $model->SchoolInformation->getSchoolInformation()['SchoolInformation']['edumap_key'];
 		if (empty($edmKey)) {
-			$edmKey = 'sample_school'; // edumap_key がない場合はreturnでいいと思うけど、テストのためにおいておく
-			// return;
+			return;
 		}
-		$curl = curl_init('http://data-manage-01:3000/topics/fetch/specific-hostname?hostname=' . $edmKey);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		curl_exec($curl);
-		curl_close($curl);
+		$query = [
+			'hostname' => $edmKey,
+		];
+		NetCommonsDataServer::get('/topics/fetch/specific-hostname', $query);
 	}
 }
