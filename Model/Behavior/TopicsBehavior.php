@@ -373,6 +373,9 @@ class TopicsBehavior extends TopicsBaseBehavior {
 		$query = [
 			'hostname' => $edmKey,
 		];
-		NetCommonsDataServer::get('/topics/fetch/specific-hostname', $query);
+		try {
+			NetCommonsDataServer::get('/topics/fetch/specific-hostname', $query);
+		}
+		catch (exception $e) {}
 	}
 }
