@@ -11,6 +11,7 @@
 
 App::uses('ModelBehavior', 'Model');
 App::uses('TopicsBaseBehavior', 'Topics.Model/Behavior');
+App::uses('NetCommonsDataServer', 'NetCommons.Utility');
 
 /**
  * Topics Behavior
@@ -245,6 +246,8 @@ class TopicsBehavior extends TopicsBaseBehavior {
 
 		$this->saveTopics($model);
 
+		$this->__notifyDataServerToFetch($model);
+
 		return parent::afterSave($model, $created, $options);
 	}
 
@@ -270,6 +273,7 @@ class TopicsBehavior extends TopicsBaseBehavior {
  */
 	public function afterDelete(Model $model) {
 		$this->afterDeleteTopics($model);
+		$this->__notifyDataServerToFetch($model);
 	}
 
 /**
@@ -341,4 +345,37 @@ class TopicsBehavior extends TopicsBaseBehavior {
 		$this->settings[$model->alias]['data'][$key] = $value;
 	}
 
+/**
+ * DataServer に更新を通知する
+ *
+ * @param Model $model 呼び出し元のモデル
+ * @return void
+ */
+	private function __notifyDataServerToFetch(Model $model) {
+		if (!empty($model->data[$model->Topic->alias])) {
+			$hasActive = array_reduce($model->data[$model->Topic->alias], function ($prev, $value) {
+				return $prev || $value['is_active'];
+			}, false);
+
+			if (!$hasActive && empty($this->_deleteRow)) {
+				return;
+			}
+		}
+
+		$model->loadModels([
+			'SchoolInformation' => 'SchoolInformations.SchoolInformation',
+		]);
+
+		$edmKey = $model->SchoolInformation->getSchoolInformation()['SchoolInformation']['edumap_key'];
+		if (empty($edmKey)) {
+			return;
+		}
+		$query = [
+			'hostname' => $edmKey,
+		];
+		try {
+			NetCommonsDataServer::get('/topics/fetch/specific-hostname', $query);
+		}
+		catch (exception $e) {}
+	}
 }
