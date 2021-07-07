@@ -123,6 +123,8 @@ class TopicsBehavior extends TopicsBaseBehavior {
 			}
 		}
 
+		$this->__notifyDataServerToFetch($model);
+
 		return true;
 	}
 
@@ -227,6 +229,8 @@ class TopicsBehavior extends TopicsBaseBehavior {
 				throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
 			}
 		}
+
+		$this->__notifyDataServerToFetch($model);
 	}
 
 /**
@@ -245,8 +249,6 @@ class TopicsBehavior extends TopicsBaseBehavior {
 		}
 
 		$this->saveTopics($model);
-
-		$this->__notifyDataServerToFetch($model);
 
 		return parent::afterSave($model, $created, $options);
 	}
@@ -273,7 +275,6 @@ class TopicsBehavior extends TopicsBaseBehavior {
  */
 	public function afterDelete(Model $model) {
 		$this->afterDeleteTopics($model);
-		$this->__notifyDataServerToFetch($model);
 	}
 
 /**
