@@ -11,7 +11,7 @@
 
 App::uses('ModelBehavior', 'Model');
 App::uses('TopicsBaseBehavior', 'Topics.Model/Behavior');
-App::uses('NetCommonsDataServer', 'NetCommons.Utility');
+App::uses('NotifyDataServerToFetch', 'NetCommons.Utility');
 
 /**
  * Topics Behavior
@@ -363,20 +363,8 @@ class TopicsBehavior extends TopicsBaseBehavior {
 			}
 		}
 
-		$model->loadModels([
-			'SchoolInformation' => 'SchoolInformations.SchoolInformation',
-		]);
-
-		$edmKey = $model->SchoolInformation->getSchoolInformation()['SchoolInformation']['edumap_key'];
-		if (empty($edmKey)) {
-			return;
-		}
-		$query = [
-			'hostname' => $edmKey,
-		];
-		try {
-			NetCommonsDataServer::get('/topics/fetch/specific-hostname', $query);
-		}
-		catch (exception $e) {}
+		//データ管理サーバに通知する
+		//-->通知は、NetCommonsAppModel::commitで行う
+		NotifyDataServerToFetch::set();
 	}
 }
