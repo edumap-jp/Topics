@@ -354,6 +354,10 @@ class TopicsBehavior extends TopicsBaseBehavior {
  */
 	private function __notifyDataServerToFetch(Model $model) {
 		if (!empty($model->data[$model->Topic->alias])) {
+			$date = reset($model->data[$model->Topic->alias])['publish_start'];
+			$publish_start = new DateTime($date);
+			$publish_start->setTimezone( new DateTimeZone('Asia/Tokyo'));
+
 			$hasActive = array_reduce($model->data[$model->Topic->alias], function ($prev, $value) {
 				return $prev || $value['is_active'];
 			}, false);
@@ -371,9 +375,15 @@ class TopicsBehavior extends TopicsBaseBehavior {
 		if (empty($edmKey)) {
 			return;
 		}
+
 		$query = [
 			'hostname' => $edmKey,
 		];
+
+		if (new DateTime() <= $publish_start) {
+			$query['publish_start'] = $publish_start->format('Y-m-d H:i:s');
+		}
+
 		try {
 			NetCommonsDataServer::get('/topics/fetch/specific-hostname', $query);
 		}
