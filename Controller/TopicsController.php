@@ -181,7 +181,7 @@ class TopicsController extends TopicsAppController {
 		// 教育委員会・その他（校長会、研究会等）の場合、表示させない
 		if (! empty($this->request->params['ext']) &&
 				$this->request->params['ext'] === 'json' &&
-				!empty($school['SchoolInformation']['is_board_of_education'])) {
+				!empty($school['SchoolInformation']['is_organazation'])) {
 
 			return array(
 				'topics' => [],
